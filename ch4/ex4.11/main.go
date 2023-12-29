@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"log"
+	"gopl.io/ch4/ex4.11/github"
 )
 
 var token *string
@@ -39,6 +40,9 @@ func invalidCommand() {
 
 func main() {
 	flag.Parse()
+
+	github.Debug = *debug
+
 	logDebug("Debug: true")
 
 	if len(flag.Args()) == 0 {
@@ -97,6 +101,15 @@ func create(args []string) {
 
 func read(args []string) {
 	logDebug("read arg: %s", args)
+	result, err := github.GetIssuesByRepo(*token, *repo)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%d issues:\n", len(*result))
+	for _, item := range *result {
+		fmt.Printf("#%-5d %6.20s %.55s\n",
+			item.Number, item.User.Login, item.Title)
+	}
 }
 
 func update(args []string) {
