@@ -32,10 +32,14 @@ type User struct {
 	HTMLURL string `json:"html_url"`
 }
 
-var Debug bool
+var debug bool
+
+func EnableDebug() {
+	debug = true
+}
 
 func logDebug(format string, v ...interface{}) {
-	if Debug {
+	if debug {
 		log.Printf(format, v...)
 	}
 }

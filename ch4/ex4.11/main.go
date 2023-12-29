@@ -9,9 +9,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	"log"
 	"gopl.io/ch4/ex4.11/github"
+	"log"
+	"os"
 )
 
 var token *string
@@ -21,7 +21,7 @@ var debug *bool
 func init() {
 	token = flag.String("token", "", "github api token")
 	repo = flag.String("repo", "", "repo in format {owner}/{repo}")
-	debug = flag.Bool("debug", false, "debug output") 
+	debug = flag.Bool("debug", false, "debug output")
 }
 
 func logDebug(format string, v ...interface{}) {
@@ -32,16 +32,18 @@ func logDebug(format string, v ...interface{}) {
 
 func invalidCommand() {
 	fmt.Println("Invalid command. Available commands: create, " +
-			"read, update, delete.")
-		fmt.Println("Flags:")
-		flag.PrintDefaults()
-		os.Exit(1)
+		"read, update, delete.")
+	fmt.Println("Flags:")
+	flag.PrintDefaults()
+	os.Exit(1)
 }
 
 func main() {
 	flag.Parse()
 
-	github.Debug = *debug
+	if *debug {
+		github.EnableDebug()
+	}
 
 	logDebug("Debug: true")
 
@@ -61,11 +63,11 @@ func main() {
 
 	if len(*token) == 0 {
 		fmt.Println("Please specify token arg or GH_TOKEN env value for " +
-		"access github.")
+			"access github.")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
-	
+
 	logDebug("command: %s", flag.Args()[0])
 	commandArgs := flag.Args()[1:]
 	switch flag.Args()[0] {

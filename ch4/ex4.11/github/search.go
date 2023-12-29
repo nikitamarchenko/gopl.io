@@ -6,16 +6,38 @@ import (
 	"net/http"
 )
 
+func createRequest(method, url, token string) (*http.Request, error) {
+
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Accept", "application/vnd.github+json")
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Add("X-GitHub-Api-Version", "2022-11-28")
+
+	return req, nil
+}
+
 func GetIssuesByRepo(token string, repo string) (*IssuesListResult, error) {
 
 	url := fmt.Sprintf(IssuesURLbyRepo, repo)
 
 	logDebug(url)
 
-	resp, err := http.Get(url)
+	req, err := createRequest("GET", url, token)
 
 	if err != nil {
 		logDebug("%v", err)
+		return nil, err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -24,7 +46,7 @@ func GetIssuesByRepo(token string, repo string) (*IssuesListResult, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("search query failed: %s", resp.Status)
+		return nil, fmt.Errorf("list query failed: %s", resp.Status)
 	}
 
 	logDebug("%v", resp.Status)
@@ -35,4 +57,3 @@ func GetIssuesByRepo(token string, repo string) (*IssuesListResult, error) {
 	}
 	return &result, nil
 }
-
