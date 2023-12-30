@@ -1,11 +1,3 @@
-// Copyright © 2016 Alan A. A. Donovan & Brian W. Kernighan.
-// License: https://creativecommons.org/licenses/by-nc-sa/4.0/
-
-// See page 110.
-//!+
-
-// Package github provides a Go API for the GitHub issue tracker.
-// See https://developer.github.com/v3/search/#search-issues.
 package github
 
 import (
@@ -14,6 +6,8 @@ import (
 )
 
 const IssuesURLbyRepo = "https://api.github.com/repos/%s/issues"
+
+const IssuesURLbyRepoAndId = "https://api.github.com/repos/%s/issues/%d"
 
 type IssuesListResult []*Issue
 
@@ -25,6 +19,17 @@ type Issue struct {
 	User      *User
 	CreatedAt time.Time `json:"created_at"`
 	Body      string    // in Markdown format
+}
+
+type IssueCreateRequestPayload struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}
+
+type IssueUpdateRequestPayload struct {
+	Title string `json:"title,omitempty"`
+	Body  string `json:"body,omitempty"`
+	State string `json:"state,omitempty"`
 }
 
 type User struct {

@@ -12,6 +12,7 @@ import (
 	"gopl.io/ch4/ex4.11/github"
 	"log"
 	"os"
+	"os/exec"
 )
 
 var token *string
@@ -91,14 +92,39 @@ func create(args []string) {
 	var title string
 	flagSet.StringVar(&title, "title", "", "title of new issue")
 
+	var body string
+	flagSet.StringVar(&body, "body", "", "body of new issue")
+
 	err := flagSet.Parse(args)
 
 	if err != nil {
 		flagSet.PrintDefaults()
+		os.Exit(1)
 	}
+
+	if len(title) == 0 {
+		fmt.Println("Please specify title. It requires for creating issue.")
+		flagSet.PrintDefaults()
+		os.Exit(1)
+	}
+
 	logDebug("title: %s", title)
 
-	flagSet.PrintDefaults()
+	if len(body) == 0 {
+		body = runEditor()
+	}
+
+	logDebug("body: %s", body)
+
+	result, err := github.CreateIssue(*token, *repo, title, body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if result != nil {
+		fmt.Printf("Created: #%-5d %6.20s %.55s\n",
+			result.Number, result.User.Login, result.Title)
+	}
 }
 
 func read(args []string) {
@@ -114,10 +140,156 @@ func read(args []string) {
 	}
 }
 
+func issueState(open, close bool) *bool {
+	
+	if !close && !open {
+		return nil
+	}
+
+	var state bool
+
+	if open {
+		state = true
+	}
+
+	return &state
+}
+
 func update(args []string) {
 	logDebug("update arg: %s", args)
+
+	flagSet := flag.NewFlagSet("update", flag.ExitOnError)
+
+	var id int
+	flagSet.IntVar(&id, "id", 0, "id of issue")
+
+	var title string
+	flagSet.StringVar(&title, "title", "", "new title")
+
+	var body string
+	flagSet.StringVar(&body, "body", "", "new body")
+
+	var editor bool
+	flagSet.BoolVar(&editor, "editor", false, "use editor for body")
+
+	var close bool
+	flagSet.BoolVar(&close, "close", false, "close issue")
+
+	var open bool
+	flagSet.BoolVar(&open, "open", false, "open issue")
+
+	err := flagSet.Parse(args)
+
+	if err != nil {
+		flagSet.PrintDefaults()
+		os.Exit(1)
+	}
+
+	if id == 0 {
+		fmt.Println("Please specify issue id. It requires for updating issue.")
+		flagSet.PrintDefaults()
+		os.Exit(1)
+	}
+
+	if id < 0 {
+		fmt.Println("Please specify VALID issue id. " +
+			"It requires for updating issue.")
+		flagSet.PrintDefaults()
+		os.Exit(1)
+	}
+
+	logDebug("title: %s", title)
+
+	if len(body) == 0 && editor {
+		body = runEditor()
+	}
+
+	logDebug("body: %s", body)
+
+	if close && open {
+		fmt.Println("Please choose between close and open operation.")
+		flagSet.PrintDefaults()
+		os.Exit(1)
+	}
+
+	state := issueState(open, close)
+
+	result, err := github.UpdateIssue(*token, *repo, id, title, body, state)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if result != nil {
+		fmt.Printf("Updated: #%-5d %6.20s %.55s\n",
+			result.Number, result.User.Login, result.Title)
+	}
 }
 
 func delete(args []string) {
 	logDebug("delete arg: %s", args)
+
+	flagSet := flag.NewFlagSet("delete", flag.ExitOnError)
+
+	var id int
+	flagSet.IntVar(&id, "id", 0, "id of issue")
+
+	err := flagSet.Parse(args)
+
+	if err != nil {
+		flagSet.PrintDefaults()
+		os.Exit(1)
+	}
+
+	if id == 0 {
+		fmt.Println("Please specify issue id. It requires for updating issue.")
+		flagSet.PrintDefaults()
+		os.Exit(1)
+	}
+
+	if id < 0 {
+		fmt.Println("Please specify VALID issue id. " +
+			"It requires for updating issue.")
+		flagSet.PrintDefaults()
+		os.Exit(1)
+	}
+
+	err = github.DeleteIssue(*token, *repo, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func runEditor() string {
+	editor := os.Getenv("EDITOR")
+	if len(editor) == 0 {
+		editor = "nano"
+	}
+
+	file, err := os.CreateTemp("", "create-body-*")
+
+	if err != nil {
+		fmt.Println("Error: can't create tmp file.")
+		os.Exit(1)
+	}
+
+	cmd := exec.Command(editor, file.Name())
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	logDebug("Running command and waiting for it to finish...")
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println("Error: can't run editor.")
+		os.Exit(1)
+	}
+
+	text, err := os.ReadFile(file.Name())
+
+	if err != nil {
+		fmt.Printf("Error: can't read file %s.\n", file.Name())
+		os.Exit(1)
+	}
+
+	logDebug("Command finished with error: %v", err)
+	return string(text)
 }
