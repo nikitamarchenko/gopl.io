@@ -1,5 +1,3 @@
-// TODO: Exercise 1.3
-
 /*
 Exercise 1.3: Experiment tom easure the difference in running time bet ween our  
 potentially ineffiient versions and the one that uses strings.Join. 
