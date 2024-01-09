@@ -37,7 +37,7 @@ func TestProcessHtml(t *testing.T) {
 			"<div><p>text</p>\n</div>",
 			[]string{"\n      \n"},
 			true},
-		{"skip empty text nodes",
+		{"comment",
 			"<!--This is a comment-->",
 			[]string{"<!--This is a comment-->"},
 			false},
