@@ -11,7 +11,7 @@ import (
 	"unicode"
 )
 
-func trivial_expand(s string, f func(string) string) string {
+func trivialExpand(s string, f func(string) string) string {
 	words := strings.Split(s, " ")
 
 	for i, w := range words {
