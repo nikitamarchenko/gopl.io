@@ -14,7 +14,7 @@ func BenchmarkPopCount(b *testing.B) {
 
 func BenchmarkPopCount2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		popcount.PopCount(0x1234567890ABCDEF)
+		popcount.PopCount2(0x1234567890ABCDEF)
 	}
 }
 
