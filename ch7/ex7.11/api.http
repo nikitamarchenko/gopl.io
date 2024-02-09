@@ -1,0 +1,42 @@
+@hostname = http://127.0.0.1:8000
+
+
+GET {{hostname}}/list
+
+###
+
+GET {{hostname}}/price?item=shoes
+
+
+###
+# only POST accepted
+GET {{hostname}}/create?item=shoes&price=abc
+
+###
+# alerdy in db
+POST {{hostname}}/create?item=shoes&price=10
+
+
+###
+# invalid price
+POST {{hostname}}/create?item=shoes&price=abc
+
+
+###
+# valid creation
+POST {{hostname}}/create?item=t-shirt&price=5.5
+
+
+###
+# read 
+GET {{hostname}}/read?item=shoes
+
+
+###
+# update 
+PUT {{hostname}}/update?item=shoes&price=6.6
+
+
+###
+# delete 
+DELETE {{hostname}}/delete?item=shoes
