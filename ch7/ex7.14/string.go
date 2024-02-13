@@ -36,3 +36,13 @@ func (c min) String() string {
 	}
 	return fmt.Sprintf("min(%s)", strings.Join(b, ", "))
 }
+
+func (e Env) String() string {
+	b := make([]string, len(e))
+	var i int
+	for k, v := range e {
+		b[i] = fmt.Sprintf("%s=%g", k, v)
+		i++
+	}
+	return strings.Join(b, ",")
+}
