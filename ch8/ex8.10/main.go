@@ -115,6 +115,7 @@ func crawl(processing <-chan struct{}, u string) []string {
 	var resp *http.Response
 	go func() {
 		req, _ := http.NewRequest(http.MethodGet, startingUrl.String(), nil)
+		req.Cancel = processing
 		client := &http.Client{}
 		resp, err = client.Do(req)
 		close(reqDone)
